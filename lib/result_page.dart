@@ -59,11 +59,33 @@ class AboutPageState extends State<AboutPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Image.asset(
-                'assets/car.png', 
+                'assets/car.png',
                 width: 300,
               ),
               const SizedBox(height: 20),
-              const CarInfoCard(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildInfoCard(
+                    icon: Icons.battery_full,
+                    title: 'Battery',
+                    value: '63%',
+                    color: Colors.green,
+                  ),
+                  _buildInfoCard(
+                    icon: Icons.add_road,
+                    title: 'Remaining Distance',
+                    value: '104 km',
+                    color: Colors.blue,
+                  ),
+                  _buildInfoCard(
+                    icon: Icons.thermostat,
+                    title: 'Climate',
+                    value: '22°C',
+                    color: Colors.orange,
+                  ),
+                ],
+              ),
               const SizedBox(height: 20),
               _buildInputField(
                 controller: currentSOCController,
@@ -102,7 +124,6 @@ class AboutPageState extends State<AboutPage> {
                       double.tryParse(voltageController.text) ?? 0.0;
                   final efficiency =
                       double.tryParse(efficiencyController.text) ?? 0.0;
-
                   if (currentSOC < 0 ||
                       currentSOC > 100 ||
                       targetSOC < 0 ||
@@ -153,32 +174,38 @@ class AboutPageState extends State<AboutPage> {
       controller: controller,
       decoration: InputDecoration(
         labelText: labelText,
-        labelStyle: const TextStyle(color: Colors.grey),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        filled: true,
-        fillColor: Colors.grey.shade100, 
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: Colors.transparent,
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: Colors.blue,
-            width: 2,
-          ),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: Colors.transparent, 
-            width: 2,
-          ),
-        ),
+        border: const OutlineInputBorder(),
       ),
       keyboardType: TextInputType.number,
+    );
+  }
+
+  Widget _buildInfoCard({
+    required IconData icon,
+    required String title,
+    required String value,
+    required Color color,
+  }) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, size: 40, color: color),
+            const SizedBox(height: 10),
+            Text(title, style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: 5),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -210,66 +237,6 @@ class AboutPageState extends State<AboutPage> {
             child: const Text('OK'),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class CarInfoCard extends StatelessWidget {
-  const CarInfoCard({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _buildInfoCard(
-          icon: Icons.battery_full,
-          title: 'Battery',
-          value: '63%',
-          color: Colors.green,
-        ),
-        _buildInfoCard(
-          icon: Icons.add_road,
-          title: 'Remaining Distance',
-          value: '104 km',
-          color: Colors.blue,
-        ),
-        _buildInfoCard(
-          icon: Icons.thermostat,
-          title: 'Climate',
-          value: '22°C',
-          color: Colors.orange,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildInfoCard({
-    required IconData icon,
-    required String title,
-    required String value,
-    required Color color,
-  }) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, size: 40, color: color),
-            const SizedBox(height: 10),
-            Text(title, style: const TextStyle(fontSize: 16)),
-            const SizedBox(height: 5),
-            Text(
-              value,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
       ),
     );
   }
