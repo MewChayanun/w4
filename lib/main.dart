@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'welcome_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -9,9 +10,47 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: AboutPage(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const HomePage(),
+        '/welcome': (context) => const WelcomePage(),
+        '/about': (context) => const AboutPage(),
+      },
+    );
+  }
+}
+
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Home Page'),
+        backgroundColor: Colors.blue,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/welcome');
+              },
+              child: const Text('Go to Welcome Page'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/about');
+              },
+              child: const Text('Go to About Page'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -59,7 +98,7 @@ class AboutPageState extends State<AboutPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Image.asset(
-                'assets/car.png', 
+                'assets/car.png',
                 width: 300,
               ),
               const SizedBox(height: 20),
@@ -108,20 +147,14 @@ class AboutPageState extends State<AboutPage> {
                       targetSOC < 0 ||
                       targetSOC > 100 ||
                       targetSOC <= currentSOC) {
-                    _showErrorDialog(
-                      context,
-                      'Invalid Input',
-                      'Please ensure SOC values are between 0 and 100, and Target SOC > Current SOC.',
-                    );
+                    _showSnackBar(context,
+                        'Invalid Input: SOC values must be between 0-100 and Target SOC > Current SOC.');
                     return;
                   }
 
                   if (chargingRate <= 0 || voltage <= 0 || efficiency <= 0) {
-                    _showErrorDialog(
-                      context,
-                      'Invalid Input',
-                      'Please ensure Charging Rate, Voltage, and Efficiency are greater than 0.',
-                    );
+                    _showSnackBar(context,
+                        'Invalid Input: Charging Rate, Voltage, and Efficiency must be greater than 0.');
                     return;
                   }
 
@@ -130,10 +163,10 @@ class AboutPageState extends State<AboutPage> {
                       100 *
                       (63 / chargingPower / (efficiency / 100));
 
-                  _showResultDialog(
+                  Navigator.pushNamed(
                     context,
-                    'Calculation Result',
-                    'Charging Time: ${chargingTime.toStringAsFixed(2)} hours',
+                    '/result',
+                    arguments: chargingTime.toStringAsFixed(2),
                   );
                 },
                 child: const Text('Calculate Charging Time'),
@@ -154,9 +187,10 @@ class AboutPageState extends State<AboutPage> {
       decoration: InputDecoration(
         labelText: labelText,
         labelStyle: const TextStyle(color: Colors.grey),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         filled: true,
-        fillColor: Colors.grey.shade100, 
+        fillColor: Colors.grey.shade100,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(
@@ -173,7 +207,7 @@ class AboutPageState extends State<AboutPage> {
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(
-            color: Colors.transparent, 
+            color: Colors.transparent,
             width: 2,
           ),
         ),
@@ -182,34 +216,54 @@ class AboutPageState extends State<AboutPage> {
     );
   }
 
-  void _showResultDialog(BuildContext context, String title, String content) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(content),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
+  void _showSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
       ),
     );
   }
+}
 
-  void _showErrorDialog(BuildContext context, String title, String content) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title, style: const TextStyle(color: Colors.red)),
-        content: Text(content),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+class ResultPage extends StatelessWidget {
+  const ResultPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final chargingTime = ModalRoute.of(context)?.settings.arguments as String?;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Calculation Result'),
+      ),
+      body: Center(
+        child: Card(
+          color: Colors.blue.shade100,
+          margin: const EdgeInsets.all(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Charging Time',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  '$chargingTime hours',
+                  style: const TextStyle(fontSize: 24, color: Colors.black87),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Back'),
+                ),
+              ],
+            ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -231,7 +285,7 @@ class CarInfoCard extends StatelessWidget {
         ),
         _buildInfoCard(
           icon: Icons.add_road,
-          title: 'Remaining Distance',
+          title: 'Distance',
           value: '104 km',
           color: Colors.blue,
         ),
